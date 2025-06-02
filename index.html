@@ -135,12 +135,19 @@
             color: #b0b0b0;
         }
         #progress-container {
+            position: relative;
             width: 100%;
-            height: 12px;
+            height: 24px;
             background-color: #444;
             border-radius: 6px;
             margin-top: 20px;
             overflow: hidden;
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         #progress-bar {
             height: 100%;
@@ -148,6 +155,17 @@
             background-color: #e53935;
             border-radius: 6px;
             transition: width 0.5s ease;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        #progress-percent {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            text-align: center;
+            user-select: none;
         }
     </style>
 </head>
@@ -162,6 +180,7 @@
         <div id="target-date">Target Date: December 2, 2025 09:27 AM</div>
         <div id="progress-container">
             <div id="progress-bar"></div>
+            <div id="progress-percent">0%</div>
         </div>
     </div>
     <script>
@@ -169,6 +188,7 @@
         const messageElement = document.getElementById('message');
         const targetDate = new Date('December 2, 2025 09:27:00').getTime();
         const progressBar = document.getElementById('progress-bar');
+        const progressPercentText = document.getElementById('progress-percent');
         const startDate = new Date().getTime(); // Countdown start time (now)
 
         function updateCountdown() {
@@ -182,6 +202,7 @@
                 countdownElement.style.display = 'none';
                 messageElement.textContent = 'Countdown finished!';
                 progressBar.style.width = '100%';
+                progressPercentText.textContent = '100%';
                 clearInterval(intervalId);
                 return;
             }
@@ -198,7 +219,9 @@
                 '<span class="time-segment">' + seconds + 's</span>';
 
             progressBar.style.width = progressPercent + '%';
+            progressPercentText.textContent = progressPercent.toFixed(2) + '%';
         }
+
 
         updateCountdown();
         const intervalId = setInterval(updateCountdown, 1000);
