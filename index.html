@@ -212,6 +212,25 @@
                 const emptyLength = progressBarLength - filledLength;
                 const progressBar = '🟥'.repeat(filledLength) + '⬜'.repeat(emptyLength);
 
+                // Format elapsed time
+                const elapsedTime = new Date(elapsed);
+                const elapsedDays = Math.floor(elapsed / (1000 * 60 * 60 * 24));
+                const elapsedHours = elapsedTime.getUTCHours();
+                const elapsedMinutes = elapsedTime.getUTCMinutes();
+                const elapsedSeconds = elapsedTime.getUTCSeconds();
+
+                // Dynamic status message based on progress
+                let statusMessage = "Keep going!";
+                if (progressPercent >= 1) {
+                    statusMessage = "🎉 Countdown finished! 🎉";
+                } else if (progressPercent > 0.75) {
+                    statusMessage = "Almost there!";
+                } else if (progressPercent > 0.5) {
+                    statusMessage = "More than halfway done!";
+                } else if (progressPercent > 0.25) {
+                    statusMessage = "Making progress!";
+                }
+
                 await fetch(webhookUrl, {
                     method: 'POST',
                     headers: {
@@ -221,6 +240,7 @@
                         embeds: [
                             {
                                 title: "🚀 Henclin Unban Countdown 🚀",
+                                description: statusMessage,
                                 color: 0xe53935,
                                 author: {
                                     name: "Henclin Countdown Bot",
@@ -233,8 +253,18 @@
                                         inline: true
                                     },
                                     {
+                                        name: "Elapsed Time",
+                                        value: `${elapsedDays}d ${elapsedHours}h ${elapsedMinutes}m ${elapsedSeconds}s`,
+                                        inline: true
+                                    },
+                                    {
                                         name: "Progress",
                                         value: progressBar,
+                                        inline: false
+                                    },
+                                    {
+                                        name: "Percentage Complete",
+                                        value: `${(progressPercent * 100).toFixed(2)}%`,
                                         inline: true
                                     }
                                 ],
