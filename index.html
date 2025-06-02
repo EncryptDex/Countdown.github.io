@@ -129,6 +129,26 @@
                 margin-bottom: 15px;
             }
         }
+        #target-date {
+            margin-top: 20px;
+            font-size: 1em;
+            color: #b0b0b0;
+        }
+        #progress-container {
+            width: 100%;
+            height: 12px;
+            background-color: #444;
+            border-radius: 6px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #e53935;
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
     </style>
 </head>
 <body>
@@ -136,22 +156,32 @@
         <img src="henclin.png" alt="Profile" id="profile-image" />
         <div id="profile-name">Henclin</div>
         <h1>countdown akun henclin ke unban</h1>
-        <p id="description">Penghitung waktu mundur menunjukkan waktu tersisa hingga akun Henclin dibuka blokirnya. <strong>Roblox Anjing</strong></p>
+        <p id="description">Penghitung waktu mundur menunjukkan waktu tersisa hingga akun Henclin dibuka blokirnya.</p>
         <div id="countdown"></div>
         <div id="message"></div>
+        <div id="target-date">Target Date: December 2, 2025 09:27 AM</div>
+        <div id="progress-container">
+            <div id="progress-bar"></div>
+        </div>
     </div>
     <script>
         const countdownElement = document.getElementById('countdown');
         const messageElement = document.getElementById('message');
         const targetDate = new Date('December 2, 2025 09:27:00').getTime();
+        const progressBar = document.getElementById('progress-bar');
+        const startDate = new Date().getTime(); // Countdown start time (now)
 
         function updateCountdown() {
             const now = new Date().getTime();
             const distance = targetDate - now;
+            const totalDuration = targetDate - startDate;
+            const elapsed = now - startDate;
+            const progressPercent = Math.min((elapsed / totalDuration) * 100, 100);
 
             if (distance <= 0) {
                 countdownElement.style.display = 'none';
                 messageElement.textContent = 'Countdown finished!';
+                progressBar.style.width = '100%';
                 clearInterval(intervalId);
                 return;
             }
@@ -166,6 +196,8 @@
                 '<span class="time-segment">' + hours + 'h</span>' + 
                 '<span class="time-segment">' + minutes + 'm</span>' + 
                 '<span class="time-segment">' + seconds + 's</span>';
+
+            progressBar.style.width = progressPercent + '%';
         }
 
         updateCountdown();
