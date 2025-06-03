@@ -1,77 +1,116 @@
-name: Discord Countdown Bot
+name: Ultimate Countdown Bot
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # Runs every 5 minutes
-  workflow_dispatch:       # Allows manual triggering
+    - cron: '*/5 * * * *'  # Update setiap 5 menit
+  workflow_dispatch:       # Memungkinkan trigger manual
 
 jobs:
   countdown:
     runs-on: ubuntu-latest
     steps:
-      - name: Calculate time remaining
-        id: timer
-        run: |
-          # Set your target date (ISO 8601 format)
-          TARGET="2025-12-02T09:27:00Z"
-          NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-
-          # Calculate seconds
-          target_sec=$(date -d "$TARGET" +%s)
-          now_sec=$(date -d "$NOW" +%s)
-          remaining=$((target_sec - now_sec))
-
-          # Format time components
-          days=$((remaining / 86400))
-          hours=$(( (remaining % 86400) / 3600 ))
-          mins=$(( (remaining % 3600) / 60 ))
-          secs=$((remaining % 60))
-
-          # Calculate percentage (simplified)
-          total_days=$(( (target_sec - $(date -d "2025-06-02T09:27:00Z" +%s)) / 86400 ))
-          elapsed_days=$(( (now_sec - $(date -d "2025-06-02T09:27:00Z" +%s)) / 86400 ))
-          percent=$(( (elapsed_days * 100) / total_days ))
-
-          # Create progress bar
-          bar_length=20
-          filled=$(( percent * bar_length / 100 ))
-          progress_bar=$(printf '🟩%.0s' $(seq 1 $filled))$(printf '⬜%.0s' $(seq 1 $((bar_length - filled))))
-
-          # Output results
-          echo "time_remaining=${days}d ${hours}h ${mins}m ${secs}s" >> $GITHUB_OUTPUT
-          echo "progress=${progress_bar} ${percent}%" >> $GITHUB_OUTPUT
-          echo "current_time=${NOW}" >> $GITHUB_OUTPUT
-
-      - name: Send to Discord
+      - name: Hitung waktu
+        id: hitung
         env:
-          WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          TARGET: "2025-12-02 09:27:00"  # Ganti dengan tanggal target
+          START: "2025-06-02 09:27:00"    # Ganti tanggal mulai
         run: |
+          # Hitung waktu
+          NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          target_sec=$(date -d "$TARGET" +%s)
+          start_sec=$(date -d "$START" +%s)
+          now_sec=$(date -d "$NOW" +%s)
+
+          # Kalkulasi
+          remaining=$((target_sec - now_sec))
+          elapsed=$((now_sec - start_sec))
+          total=$((target_sec - start_sec))
+          percent=$((elapsed * 100 / total))
+
+          # Format waktu
+          days=$((remaining / 86400)); hours=$(( (remaining % 86400) / 3600 ))
+          mins=$(( (remaining % 3600) / 60 )); secs=$((remaining % 60))
+          elapsed_d=$((elapsed / 86400)); elapsed_h=$(( (elapsed % 86400) / 3600 ))
+
+          # Progress bar dengan gradient warna
+          if [ $percent -lt 25 ]; then
+            color=16711680  # Merah
+            emoji="🔴"
+            bar=$(printf '🟥%.0s' $(seq 1 $((percent/5))))$(printf '⬛%.0s' $(seq 1 $((20-(percent/5)))))
+          elif [ $percent -lt 50 ]; then
+            color=16744192  # Oranye
+            emoji="🟠"
+            bar=$(printf '🟧%.0s' $(seq 1 $((percent/5))))$(printf '⬛%.0s' $(seq 1 $((20-(percent/5)))))
+          elif [ $percent -lt 75 ]; then
+            color=16760576  # Kuning
+            emoji="🟡"
+            bar=$(printf '🟨%.0s' $(seq 1 $((percent/5))))$(printf '⬛%.0s' $(seq 1 $((20-(percent/5)))))
+          else
+            color=65280  # Hijau
+            emoji="🟢"
+            bar=$(printf '🟩%.0s' $(seq 1 $((percent/5))))$(printf '⬛%.0s' $(seq 1 $((20-(percent/5)))))
+          fi
+
+          # Hitung kecepatan (hari tersisa per hari)
+          if [ $elapsed_d -gt 0 ]; then
+            speed=$(echo "scale=2; $remaining / 86400 / $elapsed_d" | bc)
+          else
+            speed=1.00
+          fi
+
+          # Simpan output
+          echo "days=$days" >> $GITHUB_OUTPUT
+          echo "hours=$hours" >> $GITHUB_OUTPUT
+          echo "mins=$mins" >> $GITHUB_OUTPUT
+          echo "secs=$secs" >> $GITHUB_OUTPUT
+          echo "percent=$percent" >> $GITHUB_OUTPUT
+          echo "bar=$bar" >> $GITHUB_OUTPUT
+          echo "color=$color" >> $GITHUB_OUTPUT
+          echo "emoji=$emoji" >> $GITHUB_OUTPUT
+          echo "speed=$speed" >> $GITHUB_OUTPUT
+          echo "now=$NOW" >> $GITHUB_OUTPUT
+
+      - name: Kirim ke Discord
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          # Format tanggal target
+          target_date=$(date -d "$TARGET" "+%A, %d %B %Y %H:%M UTC")
+
           payload='{
             "embeds": [{
-              "title": "⏳ Unban Countdown",
-              "description": "**Time remaining:** ${{ steps.timer.outputs.time_remaining }}",
-              "color": 65280,
+              "title": "${{ steps.hitung.outputs.emoji }} COUNTDOWN BOT ${{ steps.hitung.outputs.emoji }}",
+              "description": "**Target:** '$target_date'",
+              "color": ${{ steps.hitung.outputs.color }},
+              "thumbnail": {
+                "url": "https://cdn-icons-png.flaticon.com/512/3202/3202926.png"
+              },
               "fields": [
                 {
-                  "name": "Progress",
-                  "value": "${{ steps.timer.outputs.progress }}",
+                  "name": "⏳ Waktu Tersisa",
+                  "value": "```${{ steps.hitung.outputs.days }} hari ${{ steps.hitung.outputs.hours }} jam ${{ steps.hitung.outputs.mins }} menit ${{ steps.hitung.outputs.secs }} detik```",
+                  "inline": true
+                },
+                {
+                  "name": "📈 Progress",
+                  "value": "**${{ steps.hitung.outputs.bar }} ${{ steps.hitung.outputs.percent }}%**\n`$elapsed_d` hari telah berlalu dari total `$total_d` hari",
+                  "inline": true
+                },
+                {
+                  "name": "🚀 Kecepatan",
+                  "value": "`${{ steps.hitung.outputs.speed }}x` lebih cepat dari waktu nyata",
                   "inline": false
                 }
               ],
               "footer": {
-                "text": "Last updated: ${{ steps.timer.outputs.current_time }}"
+                "text": "Terakhir update: ${{ steps.hitung.outputs.now }}",
+                "icon_url": "https://cdn-icons-png.flaticon.com/512/447/447031.png"
               }
             }]
           }'
 
-          # Send with error handling
-          curl_response=$(curl -s -o /dev/null -w "%{http_code}" \
-            -X POST \
+          # Kirim dengan error handling
+          curl -X POST \
             -H "Content-Type: application/json" \
             -d "$payload" \
-            "$WEBHOOK_URL")
-
-          if [ "$curl_response" -ne 204 ]; then
-            echo "Error: Discord webhook failed (HTTP $curl_response)"
-            exit 1
-          fi
+            "$WEBHOOK" || echo "Gagal mengirim webhook"
