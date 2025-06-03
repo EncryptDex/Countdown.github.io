@@ -9,8 +9,10 @@ jobs:
   send_webhook:
     runs-on: ubuntu-latest
     steps:
-      - name: Install jq
-        run: sudo apt-get install -y jq
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq curl
 
       - name: Send Discord Webhook
         env:
@@ -18,7 +20,8 @@ jobs:
         shell: bash
         run: |
           # Set timezone and get current time
-          CURRENT_TIME=$(TZ=UTC date +"%Y-%m-%dT%H:%M:%SZ")
+          export TZ=UTC
+          CURRENT_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           TARGET_DATE="2025-12-02T09:27:00Z"
           START_DATE="2025-06-02T09:27:00Z"
 
@@ -49,7 +52,7 @@ jobs:
           BAR_LENGTH=20
           FILLED_LENGTH=$((BAR_LENGTH * PROGRESS_PERCENT / 100))
           EMPTY_LENGTH=$((BAR_LENGTH - FILLED_LENGTH))
-          PROGRESS_BAR=$(printf '🟥%.0s' $(seq 1 $FILLED_LENGTH))$(printf '⬜%.0s' $(seq 1 $EMPTY_LENGTH))
+          PROGRESS_BAR="[$(printf '🟥%.0s' $(seq 1 $FILLED_LENGTH))$(printf '⬜%.0s' $(seq 1 $EMPTY_LENGTH))]"
 
           # Build and send payload
           PAYLOAD=$(jq -n \
@@ -59,16 +62,28 @@ jobs:
             --arg ct "$CURRENT_TIME" \
             '{
               "embeds": [{
-                "title": "🚀 Henclin Unban Countdown",
-                "description": "Auto-update every 5 minutes",
+                "title": "🚀 Henclin Unban Countdown 🚀",
+                "description": "Time until Henclin is unbanned",
                 "color": 14804227,
                 "fields": [
-                  {"name": "Time Remaining", "value": $tr, "inline": true},
-                  {"name": "Progress", "value": $pb, "inline": true},
-                  {"name": "Percentage", "value": "\($pp)%", "inline": true}
+                  {
+                    "name": "Time Remaining",
+                    "value": $tr,
+                    "inline": true
+                  },
+                  {
+                    "name": "Progress",
+                    "value": $pb,
+                    "inline": true
+                  },
+                  {
+                    "name": "Percentage Complete",
+                    "value": ($pp + "%"),
+                    "inline": true
+                  }
                 ],
                 "footer": {
-                  "text": "Last update",
+                  "text": "Henclin Unban Countdown",
                   "icon_url": "https://cdn-icons-png.flaticon.com/512/2920/2920250.png"
                 },
                 "timestamp": $ct
@@ -76,8 +91,17 @@ jobs:
             }')
 
           # Send with error handling
-          curl -f -S -s -o /dev/null \
+          echo "Sending webhook..."
+          curl_response=$(curl -s -o /dev/null -w "%{http_code}" \
             -H "Content-Type: application/json" \
             -X POST \
             -d "$PAYLOAD" \
-            "$WEBHOOK_URL" || echo "⚠️ Failed to send webhook"
+            "$WEBHOOK_URL")
+
+          if [ "$curl_response" = "204" ]; then
+            echo "Webhook sent successfully!"
+          else
+            echo "⚠️ Failed to send webhook (HTTP $curl_response)"
+            echo "Payload: $PAYLOAD"
+            exit 1
+          fi
