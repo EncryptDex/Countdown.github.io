@@ -2,24 +2,27 @@ name: Scheduled Webhook Sender
 
 on:
   schedule:
-    # Runs every 5 minutes
-    - cron: '*/5 * * * *'
-  workflow_dispatch:  # Allows manual triggering
+    - cron: '*/5 * * * *'  # Every 5 minutes
+  workflow_dispatch:
 
 jobs:
   send_webhook:
     runs-on: ubuntu-latest
     steps:
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
       - name: Send Discord Webhook
         env:
-          WEBHOOK_URL: https://discord.com/api/webhooks/1379038305831620638/NBIvFrPcOJ2wcCCnNjNg2H8HbCl-WKC21z6Hav44kuTGvatklsci2hwT2NUejT6XSwoG
+          WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         shell: bash
         run: |
-          CURRENT_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          # Set timezone and get current time
+          CURRENT_TIME=$(TZ=UTC date +"%Y-%m-%dT%H:%M:%SZ")
           TARGET_DATE="2025-12-02T09:27:00Z"
           START_DATE="2025-06-02T09:27:00Z"
 
-          # Calculate time differences in seconds
+          # Calculate time differences
           CURRENT_EPOCH=$(date -d "$CURRENT_TIME" +%s)
           TARGET_EPOCH=$(date -d "$TARGET_DATE" +%s)
           START_EPOCH=$(date -d "$START_DATE" +%s)
@@ -28,6 +31,7 @@ jobs:
           ELAPSED_SECONDS=$((CURRENT_EPOCH - START_EPOCH))
           TOTAL_SECONDS=$((TARGET_EPOCH - START_EPOCH))
 
+          # Calculate remaining time
           if [ $REMAINING_SECONDS -le 0 ]; then
             TIME_REMAINING="0d 0h 0m 0s"
             PROGRESS_PERCENT=100
@@ -37,7 +41,6 @@ jobs:
             MINUTES=$(((REMAINING_SECONDS % 3600) / 60))
             SECONDS=$((REMAINING_SECONDS % 60))
             TIME_REMAINING="${DAYS}d ${HOURS}h ${MINUTES}m ${SECONDS}s"
-
             PROGRESS_PERCENT=$((ELAPSED_SECONDS * 100 / TOTAL_SECONDS))
             [ $PROGRESS_PERCENT -gt 100 ] && PROGRESS_PERCENT=100
           fi
@@ -46,45 +49,35 @@ jobs:
           BAR_LENGTH=20
           FILLED_LENGTH=$((BAR_LENGTH * PROGRESS_PERCENT / 100))
           EMPTY_LENGTH=$((BAR_LENGTH - FILLED_LENGTH))
-          PROGRESS_BAR=$(printf '🟥%.0s' $(seq 1 $FILLED_LENGTH))
-          PROGRESS_BAR+=$(printf '⬜%.0s' $(seq 1 $EMPTY_LENGTH))
+          PROGRESS_BAR=$(printf '🟥%.0s' $(seq 1 $FILLED_LENGTH))$(printf '⬜%.0s' $(seq 1 $EMPTY_LENGTH))
 
-          # Build JSON payload
+          # Build and send payload
           PAYLOAD=$(jq -n \
-            --arg time_remaining "$TIME_REMAINING" \
-            --arg progress_bar "$PROGRESS_BAR" \
-            --arg progress_percent "$PROGRESS_PERCENT" \
-            --arg current_time "$CURRENT_TIME" \
+            --arg tr "$TIME_REMAINING" \
+            --arg pb "$PROGRESS_BAR" \
+            --arg pp "$PROGRESS_PERCENT" \
+            --arg ct "$CURRENT_TIME" \
             '{
-              "embeds": [
-                {
-                  "title": "🚀 Henclin Unban Countdown 🚀",
-                  "description": "Scheduled webhook from GitHub Actions",
-                  "color": 14804227,
-                  "fields": [
-                    {
-                      "name": "Time Remaining",
-                      "value": $time_remaining,
-                      "inline": true
-                    },
-                    {
-                      "name": "Progress",
-                      "value": $progress_bar,
-                      "inline": true
-                    },
-                    {
-                      "name": "Percentage Complete",
-                      "value": "\($progress_percent)%",
-                      "inline": true
-                    }
-                  ],
-                  "footer": {
-                    "text": "Henclin Unban Countdown",
-                    "icon_url": "https://cdn-icons-png.flaticon.com/512/2920/2920250.png"
-                  },
-                  "timestamp": $current_time
-                }
-              ]
+              "embeds": [{
+                "title": "🚀 Henclin Unban Countdown",
+                "description": "Auto-update every 5 minutes",
+                "color": 14804227,
+                "fields": [
+                  {"name": "Time Remaining", "value": $tr, "inline": true},
+                  {"name": "Progress", "value": $pb, "inline": true},
+                  {"name": "Percentage", "value": "\($pp)%", "inline": true}
+                ],
+                "footer": {
+                  "text": "Last update",
+                  "icon_url": "https://cdn-icons-png.flaticon.com/512/2920/2920250.png"
+                },
+                "timestamp": $ct
+              }]
             }')
 
-          curl -H "Content-Type: application/json" -X POST -d "$PAYLOAD" "$WEBHOOK_URL"
+          # Send with error handling
+          curl -f -S -s -o /dev/null \
+            -H "Content-Type: application/json" \
+            -X POST \
+            -d "$PAYLOAD" \
+            "$WEBHOOK_URL" || echo "⚠️ Failed to send webhook"
