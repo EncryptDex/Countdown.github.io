@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Countdown to December 2, 2025 9:27 AM</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
     <style>
         body {
@@ -26,6 +27,7 @@
             padding: 30px 25px 40px 25px;
             box-shadow: 0 0 30px rgba(0,0,0,0.8);
             transition: box-shadow 0.3s ease;
+            position: relative;
         }
         #container:hover {
             box-shadow: 0 0 40px rgba(229,57,53,0.7);
@@ -76,6 +78,7 @@
             margin: 0 auto 15px auto;
             box-shadow: 0 0 15px #555;
             transition: box-shadow 0.3s ease;
+            object-fit: cover;
         }
         #profile-image:hover {
             box-shadow: 0 0 30px #e53935;
@@ -128,11 +131,16 @@
                 font-size: 1.3em;
                 margin-bottom: 15px;
             }
+            #rbx-banned-list-label {
+                left: 20px;
+                font-size: 1.4em;
+            }
         }
+        /* Modified position for the banned list label */
         #rbx-banned-list-label {
             position: absolute;
             top: 20px;
-            left: 50px;
+            left: 20px; /* Changed from 50px to 20px to move more left */
             font-weight: 700;
             font-size: 1.8em;
             color: #e53935;
@@ -150,9 +158,9 @@
             user-select: none;
             pointer-events: none;
         }
-        #target-date {
-            margin-top: 20px;
-            font-size: 1em;
+        #target-date, #time-served {
+            margin-top: 15px;
+            font-size: 0.9em;
             color: #b0b0b0;
         }
         #progress-container {
@@ -188,68 +196,414 @@
             text-align: center;
             user-select: none;
         }
+        /* New styles for additional features */
+        .info-box {
+            background-color: #2a2a2a;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+            border-left: 4px solid #e53935;
+        }
+        .info-box h3 {
+            margin-top: 0;
+            color: #e53935;
+            font-size: 1.2em;
+        }
+        .info-box p {
+            margin-bottom: 0;
+        }
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin: 20px 0;
+            gap: 10px; /* Added gap for better spacing */
+        }
+        .stat-box {
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            padding: 12px;
+            flex: 1;
+            min-width: 130px; /* Adjusted min-width for better fit */
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        }
+        .stat-box .stat-value {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #e53935;
+            margin: 5px 0;
+        }
+        .stat-box .stat-label {
+            font-size: 0.9em;
+            color: #b0b0b0;
+        }
+        .milestone {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: rgba(46, 46, 46, 0.5);
+            border-radius: 8px;
+        }
+        .milestone-icon {
+            font-size: 1.5em;
+            margin-right: 10px;
+            color: #e53935;
+        }
+        .milestone-content {
+            text-align: left;
+            flex: 1;
+        }
+        .milestone-date {
+            font-weight: 700;
+            color: #e53935;
+        }
+        .milestone-text {
+            color: #b0b0b0;
+            font-size: 0.9em;
+        }
+        #social-links {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        .social-link {
+            color: #b0b0b0;
+            font-size: 1.5em;
+            transition: color 0.3s ease;
+        }
+        .social-link:hover {
+            color: #e53935;
+        }
+        #notification-toggle {
+            background-color: #e53935;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background-color 0.3s ease;
+        }
+        #notification-toggle:hover {
+            background-color: #c62828;
+        }
+        #milestone-container {
+            margin-top: 20px;
+        }
+        #time-display-options {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        #timezone-select {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #555;
+            background-color: #333;
+            color: #c0c0c0;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+        #timezone-select option {
+            background-color: #333;
+            color: #c0c0c0;
+        }
+        #time-until-container {
+            margin-top: 10px;
+        }
+        #time-until, #time-served-value {
+            font-weight: 700;
+            color: #e53935;
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8em;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        #timezone-info {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
     <div id="container">
-    <div id="rbx-banned-list-label"><img src="roblox.png" alt="Roblox Logo" />BannedList.com</div>
+        <div id="rbx-banned-list-label"><img src="roblox.png" alt="Roblox Logo" />BannedList.com</div>
         <img src="henclin.png" alt="Profile" id="profile-image" />
         <div id="profile-name">Henclin</div>
-        <h1>countdown akun henclin ke unban</h1>
-        <p id="description">Penghitung waktu mundur menunjukkan waktu tersisa hingga akun Henclin dibuka blokirnya.</p>
+        <h1>Countdown to Account Unban</h1>
+        <p id="description">Time remaining until Henclin's account is unbanned on Roblox</p>
+        
         <div id="countdown"></div>
         <div id="message"></div>
-        <div id="target-date">Target Date: December 2, 2025 09:27 AM</div>
+        
+        <div id="time-display-options">
+            <div id="time-until-container">
+                Unban will occur on <span id="time-until"></span>
+            </div>
+            <div id="timezone-info">Times displayed in: 
+                <select id="timezone-select">
+                    <option value="local">Your Local Time</option>
+                    <option value="UTC">UTC</option>
+                    <option value="America/Los_Angeles">PST (Los Angeles)</option>
+                    <option value="America/New_York">EST (New York)</option>
+                    <option value="Europe/London">GMT (London)</option>
+                    <option value="Asia/Jakarta">WIB (Jakarta)</option>
+                    </select>
+            </div>
+        </div>
+        
+        <div id="time-served">Time Served: <span id="time-served-value">0d 0h 0m 0s</span></div>
+
         <div id="progress-container">
             <div id="progress-bar"></div>
             <div id="progress-percent">0%</div>
         </div>
+        
+        <div class="stats-container">
+            <div class="stat-box">
+                <div class="stat-label">Days Remaining</div>
+                <div class="stat-value" id="stat-days">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Percent Complete</div>
+                <div class="stat-value" id="stat-percent">0%</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Current Phase</div>
+                <div class="stat-value" id="stat-phase">Early</div>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <h3><i class="fas fa-info-circle"></i> About This Ban</h3>
+            <p>This account was banned on June 2, 2025 at 09:27 AM WIB for a duration of 6 months. The unban process is automatic and will occur precisely at the scheduled time.</p>
+        </div>
+        
+        <div id="milestone-container">
+            <h3>Unban Progress Milestones</h3>
+            <div class="milestone">
+                <div class="milestone-icon"><i class="fas fa-flag"></i></div>
+                <div class="milestone-content">
+                    <div class="milestone-date">25% Complete</div>
+                    <div class="milestone-text">Quarter of the way through the ban period</div>
+                </div>
+            </div>
+            <div class="milestone">
+                <div class="milestone-icon"><i class="fas fa-chart-line"></i></div>
+                <div class="milestone-content">
+                    <div class="milestone-date">50% Complete</div>
+                    <div class="milestone-text">Halfway point reached in the ban duration</div>
+                </div>
+            </div>
+            <div class="milestone">
+                <div class="milestone-icon"><i class="fas fa-bolt"></i></div>
+                <div class="milestone-content">
+                    <div class="milestone-date">75% Complete</div>
+                    <div class="milestone-text">Final stretch - unban approaching soon</div>
+                </div>
+            </div>
+            <div class="milestone">
+                <div class="milestone-icon"><i class="fas fa-trophy"></i></div>
+                <div class="milestone-content">
+                    <div class="milestone-date">100% Complete</div>
+                    <div class="milestone-text">Account unbanned and ready to play!</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <h3><i class="fas fa-bell"></i> Notification Options</h3>
+            <p>Get notified when the countdown completes or reaches important milestones.</p>
+            <button id="notification-toggle">Enable Notifications</button>
+            <div class="tooltip" style="display: inline-block; margin-left: 10px;">
+                <i class="fas fa-question-circle"></i>
+                <span class="tooltiptext">Browser notifications will alert you when important milestones are reached</span>
+            </div>
+        </div>
+        
+        <div id="social-links">
+            <a href="https://twitter.com/intent/tweet?text=Counting%20down%20to%20Henclin%27s%20Roblox%20unban!%20Check%20it%20out%3A%20[YOUR_PAGE_URL]" class="social-link" target="_blank" title="Share on Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="https://discord.gg/[YOUR_DISCORD_INVITE]" class="social-link" target="_blank" title="Join Discord"><i class="fab fa-discord"></i></a>
+            <a href="https://www.youtube.com/[YOUR_YOUTUBE_CHANNEL]" class="social-link" target="_blank" title="Subscribe on YouTube"><i class="fab fa-youtube"></i></a>
+            <a href="https://www.twitch.tv/[YOUR_TWITCH_CHANNEL]" class="social-link" target="_blank" title="Follow on Twitch"><i class="fab fa-twitch"></i></a>
+             <a href="#" class="social-link" id="copy-link" title="Copy Page Link"><i class="fas fa-link"></i></a>
+        </div>
     </div>
+    
     <script>
         const countdownElement = document.getElementById('countdown');
         const messageElement = document.getElementById('message');
-        const targetDate = new Date('December 2, 2025 09:27:00').getTime();
+        const targetDate = new Date('December 2, 2025 09:27:00 AM UTC+0700').getTime(); // Assuming WIB is UTC+7
         const progressBar = document.getElementById('progress-bar');
         const progressPercentText = document.getElementById('progress-percent');
-        const startDate = new Date('June 2, 2025 09:27:00').getTime(); // Updated fixed countdown start time
+        const startDate = new Date('June 2, 2025 09:27:00 AM UTC+0700').getTime(); // Assuming WIB is UTC+7
+        const timeUntilElement = document.getElementById('time-until');
+        const timeServedValueElement = document.getElementById('time-served-value');
+        const statDaysElement = document.getElementById('stat-days');
+        const statPercentElement = document.getElementById('stat-percent');
+        const statPhaseElement = document.getElementById('stat-phase');
+        const notificationToggle = document.getElementById('notification-toggle');
+        const timezoneSelect = document.getElementById('timezone-select');
+        const copyLinkButton = document.getElementById('copy-link');
 
+        // IMPORTANT: Replace with your actual Discord webhook URL if you're using it
         const webhookUrl = 'https://discord.com/api/webhooks/1379038305831620638/NBIvFrPcOJ2wcCCnNjNg2H8HbCl-WKC21z6Hav44kuTGvatklsci2hwT2NUejT6XSwoG';
-
-        function formatRemainingTime(distance) {
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-            return { days, hours, minutes, seconds };
+        
+        let notificationPermission = Notification.permission === 'granted'; // Check initial permission
+        if ('Notification' in window && Notification.permission !== 'denied') {
+            updateNotificationButton(); // Update button even if not granted yet
+        } else if (Notification.permission === 'denied') {
+            notificationToggle.textContent = 'Notifications Blocked';
+            notificationToggle.style.backgroundColor = '#666';
+            notificationToggle.disabled = true;
         }
 
-        async function sendWebhook(timeObj) {
+        function updateNotificationButton() {
+            if (!('Notification' in window)) {
+                notificationToggle.style.display = 'none';
+                return;
+            }
+            
+            if (notificationPermission) {
+                notificationToggle.textContent = 'Notifications Enabled';
+                notificationToggle.style.backgroundColor = '#4CAF50';
+            } else {
+                notificationToggle.textContent = 'Enable Notifications';
+                notificationToggle.style.backgroundColor = '#e53935';
+            }
+        }
+        
+        notificationToggle.addEventListener('click', () => {
+            if (!('Notification' in window)) return;
+            
+            if (Notification.permission === 'denied') {
+                alert('Notifications have been blocked by your browser. Please enable them in your site settings.');
+                return;
+            }
+            
+            if (Notification.permission === 'granted') {
+                // If already granted, assume user wants to disable (no direct way to revoke via JS)
+                // For a more robust solution, you might store this preference in localStorage.
+                notificationPermission = false;
+                updateNotificationButton();
+                alert('Notifications are still enabled at browser level, but we will not send them from this page.');
+            } else {
+                Notification.requestPermission().then(permission => {
+                    notificationPermission = permission === 'granted';
+                    updateNotificationButton();
+                    
+                    if (permission === 'granted') {
+                        showNotification('Countdown Notifications Enabled', 'You will be notified at important milestones.');
+                    }
+                });
+            }
+        });
+        
+        function showNotification(title, body) {
+            if (!notificationPermission || !('Notification' in window) || Notification.permission !== 'granted') return;
+            
+            const options = {
+                body: body,
+                icon: 'https://cdn-icons-png.flaticon.com/512/2920/2920250.png'
+            };
+            
+            new Notification(title, options);
+        }
+        
+        function formatTime(milliseconds) {
+            const days = Math.floor(milliseconds / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((milliseconds % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((milliseconds % (1000 * 60)) / 1000);
+            return { days, hours, minutes, seconds };
+        }
+        
+        function getPhase(percent) {
+            if (percent >= 99.9) return 'Unbanned!';
+            if (percent >= 75) return 'Final Stretch';
+            if (percent >= 50) return 'Mid Phase';
+            if (percent >= 25) return 'Progressing';
+            return 'Early Phase';
+        }
+        
+        function formatUnbanDateTime(targetTimestamp, timezone) {
+            const date = new Date(targetTimestamp);
+            let options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true // Use 12-hour format with AM/PM
+            };
+
+            if (timezone === 'UTC') {
+                options.timeZone = 'UTC';
+                return date.toLocaleDateString('en-US', options) + ' UTC';
+            } else if (timezone === 'local') {
+                 options.timeZoneName = 'short'; // Display local timezone abbreviation
+                return date.toLocaleDateString(undefined, options);
+            } else {
+                try {
+                    options.timeZone = timezone;
+                    options.timeZoneName = 'short';
+                    return date.toLocaleDateString(undefined, options);
+                } catch (e) {
+                    console.error("Invalid timezone:", timezone, e);
+                    options.timeZoneName = 'short'; // Fallback to local if invalid
+                    return date.toLocaleDateString(undefined, options);
+                }
+            }
+        }
+        
+        async function sendWebhook(timeObj, elapsedObj, progressPercent) {
             try {
                 const progressBarLength = 20;
-                const totalDuration = targetDate - startDate;
-                const now = new Date().getTime();
-                const elapsed = now - startDate;
-                const progressPercent = Math.min((elapsed / totalDuration), 1);
-                const filledLength = Math.round(progressBarLength * progressPercent);
+                const filledLength = Math.round(progressBarLength * (progressPercent / 100));
                 const emptyLength = progressBarLength - filledLength;
-                const progressBar = '🟥'.repeat(filledLength) + '⬜'.repeat(emptyLength);
+                const discordProgressBar = '🟥'.repeat(filledLength) + '⬜'.repeat(emptyLength);
 
-                // Format elapsed time
-                const elapsedTime = new Date(elapsed);
-                const elapsedDays = Math.floor(elapsed / (1000 * 60 * 60 * 24));
-                const elapsedHours = elapsedTime.getUTCHours();
-                const elapsedMinutes = elapsedTime.getUTCMinutes();
-                const elapsedSeconds = elapsedTime.getUTCSeconds();
-
-                // Dynamic status message based on progress
                 let statusMessage = "Keep going!";
-                if (progressPercent >= 1) {
-                    statusMessage = "🎉 Countdown finished! 🎉";
-                } else if (progressPercent > 0.75) {
+                if (progressPercent >= 100) {
+                    statusMessage = "🎉 Countdown finished! Account unbanned! 🎉";
+                } else if (progressPercent > 75) {
                     statusMessage = "Almost there!";
-                } else if (progressPercent > 0.5) {
+                } else if (progressPercent > 50) {
                     statusMessage = "More than halfway done!";
-                } else if (progressPercent > 0.25) {
+                } else if (progressPercent > 25) {
                     statusMessage = "Making progress!";
                 }
 
@@ -275,18 +629,18 @@
                                         inline: true
                                     },
                                     {
-                                        name: "Elapsed Time",
-                                        value: `${elapsedDays}d ${elapsedHours}h ${elapsedMinutes}m ${elapsedSeconds}s`,
+                                        name: "Time Served",
+                                        value: `${elapsedObj.days}d ${elapsedObj.hours}h ${elapsedObj.minutes}m ${elapsedObj.seconds}s`,
                                         inline: true
                                     },
                                     {
                                         name: "Progress",
-                                        value: progressBar,
+                                        value: discordProgressBar,
                                         inline: false
                                     },
                                     {
                                         name: "Percentage Complete",
-                                        value: `${(progressPercent * 100).toFixed(2)}%`,
+                                        value: `${progressPercent.toFixed(2)}%`,
                                         inline: true
                                     }
                                 ],
@@ -304,26 +658,43 @@
             }
         }
 
+        let lastMilestone = 0;
+        let lastWebhookSentHour = -1; // To track hourly webhook sending
+
         function updateCountdown() {
             const now = new Date().getTime();
             const distance = targetDate - now;
             const totalDuration = targetDate - startDate;
             const elapsed = now - startDate;
             const progressPercent = Math.min((elapsed / totalDuration) * 100, 100);
+            
+            // Update time served display
+            const { days: elapsedDays, hours: elapsedHours, minutes: elapsedMinutes, seconds: elapsedSeconds } = formatTime(elapsed);
+            timeServedValueElement.textContent = `${elapsedDays}d ${elapsedHours}h ${elapsedMinutes}m ${elapsedSeconds}s`;
+
+            // Update target date display based on selected timezone
+            timeUntilElement.textContent = formatUnbanDateTime(targetDate, timezoneSelect.value);
 
             if (distance <= 0) {
                 countdownElement.style.display = 'none';
-                messageElement.textContent = 'Countdown finished!';
+                messageElement.textContent = 'Account Unbanned!';
                 progressBar.style.width = '100%';
                 progressPercentText.textContent = '100%';
+                statDaysElement.textContent = '0';
+                statPercentElement.textContent = '100%';
+                statPhaseElement.textContent = 'Completed';
+                
+                if (lastMilestone !== 100 && notificationPermission) {
+                    showNotification('Account Unbanned!', 'Henclin\'s account has been unbanned on Roblox!');
+                    sendWebhook(formatTime(0), formatTime(totalDuration), 100); // Send final webhook
+                    lastMilestone = 100;
+                }
+                
                 clearInterval(intervalId);
                 return;
             }
 
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            const { days, hours, minutes, seconds } = formatTime(distance);
 
             countdownElement.innerHTML = 
                 '<span class="time-segment">' + days + 'd</span>' + 
@@ -333,18 +704,55 @@
 
             progressBar.style.width = progressPercent + '%';
             progressPercentText.textContent = progressPercent.toFixed(2) + '%';
+            
+            statDaysElement.textContent = days;
+            statPercentElement.textContent = progressPercent.toFixed(2) + '%';
+            statPhaseElement.textContent = getPhase(progressPercent);
+            
+            // Check for milestones and send notifications
+            const currentMilestone = Math.floor(progressPercent / 25) * 25;
+            if (currentMilestone > lastMilestone && notificationPermission && currentMilestone <= 75) { // Only notify up to 75%, 100% handled separately
+                let milestoneMessage = '';
+                switch(currentMilestone) {
+                    case 25:
+                        milestoneMessage = '25% complete - Quarter of the way through!';
+                        break;
+                    case 50:
+                        milestoneMessage = '50% complete - Halfway there!';
+                        break;
+                    case 75:
+                        milestoneMessage = '75% complete - Final stretch!';
+                        break;
+                }
+                
+                if (milestoneMessage) {
+                    showNotification('Countdown Milestone Reached', milestoneMessage);
+                    lastMilestone = currentMilestone;
+                    // You could also send a webhook for milestones if desired
+                }
+            }
+
+            // Send webhook every hour
+            const currentHour = new Date().getHours();
+            if (currentHour !== lastWebhookSentHour && distance > 0) {
+                sendWebhook(formatTime(distance), formatTime(elapsed), progressPercent);
+                lastWebhookSentHour = currentHour;
+            }
         }
 
-        // Send webhook every 60 seconds with remaining countdown time
-        setInterval(() => {
-            const now = new Date().getTime();
-            const distance = targetDate - now;
-            if (distance > 0) {
-                const message = formatRemainingTime(distance);
-                sendWebhook(message);
-            }
-        }, 60000);
+        // Event listener for timezone selection change
+        timezoneSelect.addEventListener('change', updateCountdown);
 
+        // Copy link functionality
+        copyLinkButton.addEventListener('click', (event) => {
+            event.preventDefault(); // Prevent default link behavior
+            const pageUrl = window.location.href;
+            navigator.clipboard.writeText(pageUrl).then(() => {
+                alert('Page link copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        });
 
         updateCountdown();
         const intervalId = setInterval(updateCountdown, 1000);
