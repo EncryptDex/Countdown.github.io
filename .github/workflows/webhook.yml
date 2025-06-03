@@ -1,111 +1,72 @@
-name: Scheduled Webhook Sender
+name: Discord Countdown Bot
 
 on:
   schedule:
-    - cron: '*/1 * * * *'  # Runs every minute
+    - cron: '*/5 * * * *'  # Update setiap 5 menit
 
 jobs:
-  send-webhook:
+  send-countdown:
     runs-on: ubuntu-latest
     steps:
-      - name: Send Discord Webhook with Countdown Data
+      - name: Hitung dan kirim countdown
+        env:
+          WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
-          TARGET_DATE="2025-12-02T09:27:00Z"
-          START_DATE="2025-06-02T09:27:00Z"
+          # Atur tanggal target dan mulai
+          TARGET="2025-12-02T09:27:00Z"  # Ganti dengan tanggal target Anda
+          START="2025-06-02T09:27:00Z"   # Ganti dengan tanggal mulai
           NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-          target_epoch=$(date -d "$TARGET_DATE" +%s)
-          start_epoch=$(date -d "$START_DATE" +%s)
-          now_epoch=$(date -d "$NOW" +%s)
+          # Hitung waktu dalam detik
+          target_sec=$(date -d "$TARGET" +%s)
+          start_sec=$(date -d "$START" +%s)
+          now_sec=$(date -d "$NOW" +%s)
 
-          distance=$((target_epoch - now_epoch))
-          elapsed=$((now_epoch - start_epoch))
-          total_duration=$((target_epoch - start_epoch))
+          # Hitung selisih waktu
+          remaining=$((target_sec - now_sec))
+          elapsed=$((now_sec - start_sec))
+          total=$((target_sec - start_sec))
 
-          if [ $distance -le 0 ]; then
-            days=0
-            hours=0
-            minutes=0
-            seconds=0
-            progress_percent=100
+          # Format waktu tersisa
+          days=$((remaining / 86400))
+          hours=$(( (remaining % 86400) / 3600 ))
+          mins=$(( (remaining % 3600) / 60 ))
+          secs=$((remaining % 60))
+
+          # Hitung persentase
+          percent=$((elapsed * 100 / total))
+          [ $percent -gt 100 ] && percent=100
+
+          # Buat progress bar
+          bar_len=20
+          filled=$((percent * bar_len / 100))
+          empty=$((bar_len - filled))
+          progress_bar=$(printf '🟥%.0s' $(seq 1 $filled))$(printf '⬜%.0s' $(seq 1 $empty))
+
+          # Buat pesan status
+          if [ $percent -eq 100 ]; then
+            status="🎉 WAKTUNYA TELAH TIBA! 🎉"
+          elif [ $percent -gt 90 ]; then
+            status="Sebentar lagi..."
+          elif [ $percent -gt 50 ]; then
+            status="Sudah lebih dari setengah!"
           else
-            days=$((distance / 86400))
-            hours=$(((distance % 86400) / 3600))
-            minutes=$(((distance % 3600) / 60))
-            seconds=$((distance % 60))
-            progress_percent=$((elapsed * 100 / total_duration))
-            if [ $progress_percent -gt 100 ]; then
-              progress_percent=100
-            fi
+            status="Masih ada waktu..."
           fi
 
-          elapsed_days=$((elapsed / 86400))
-          elapsed_hours=$(((elapsed % 86400) / 3600))
-          elapsed_minutes=$(((elapsed % 3600) / 60))
-          elapsed_seconds=$((elapsed % 60))
+          # Format payload Discord
+          payload='{
+            "embeds": [{
+              "title": "⏳ COUNTDOWN BOT ⏳",
+              "description": "'"$status"'",
+              "color": 5814783,
+              "fields": [
+                {"name": "Waktu Tersisa", "value": "'"${days}d ${hours}h ${mins}m ${secs}s"'", "inline": true},
+                {"name": "Progress", "value": "'"$progress_bar ${percent}%"'", "inline": false}
+              ],
+              "footer": {"text": "Update terakhir: '"$NOW"'"}
+            }]
+          }'
 
-          progress_bar_length=20
-          filled_length=$((progress_percent * progress_bar_length / 100))
-          empty_length=$((progress_bar_length - filled_length))
-
-          filled_bar=$(printf '🟥%.0s' $(seq 1 $filled_length))
-          empty_bar=$(printf '⬜%.0s' $(seq 1 $empty_length))
-          progress_bar="$filled_bar$empty_bar"
-
-          if [ $progress_percent -ge 100 ]; then
-            status_message="🎉 Countdown finished! 🎉"
-          elif [ $progress_percent -gt 75 ]; then
-            status_message="Almost there!"
-          elif [ $progress_percent -gt 50 ]; then
-            status_message="More than halfway done!"
-          elif [ $progress_percent -gt 25 ]; then
-            status_message="Making progress!"
-          else
-            status_message="Keep going!"
-          fi
-
-          payload=$(cat <<'EOF'
-{
-  "embeds": [
-    {
-      "title": "🚀 Henclin Unban Countdown 🚀",
-      "description": "'"$status_message"'",
-      "color": 14811232,
-      "author": {
-        "name": "Henclin Countdown Bot",
-        "icon_url": "https://cdn-icons-png.flaticon.com/512/2920/2920250.png"
-      },
-      "fields": [
-        {
-          "name": "Time Remaining",
-          "value": "'"${days}d ${hours}h ${minutes}m ${seconds}s"'",
-          "inline": true
-        },
-        {
-          "name": "Elapsed Time",
-          "value": "'"${elapsed_days}d ${elapsed_hours}h ${elapsed_minutes}m ${elapsed_seconds}s"'",
-          "inline": true
-        },
-        {
-          "name": "Progress",
-          "value": "'"$progress_bar"'",
-          "inline": false
-        },
-        {
-          "name": "Percentage Complete",
-          "value": "'"${progress_percent}%"'",
-          "inline": true
-        }
-      ],
-      "footer": {
-        "text": "Henclin Unban Countdown",
-        "icon_url": "https://cdn-icons-png.flaticon.com/512/2920/2920250.png"
-      },
-      "timestamp": "'"$NOW"'"
-    }
-  ]
-}
-EOF
-)
-
-          curl -H "Content-Type: application/json" -X POST -d "$payload" "$DISCORD_WEBHOOK_URL"
+          # Kirim ke Discord
+          curl -X POST -H "Content-Type: application/json" -d "$payload" "$WEBHOOK_URL"
