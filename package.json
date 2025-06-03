@@ -1,0 +1,11 @@
+{
+  "name": "henclin-countdown-webhook",
+  "version": "1.0.0",
+  "main": "webhook.js",
+  "dependencies": {
+    "node-fetch": "^2.6.7"
+  },
+  "scripts": {
+    "start": "node webhook.js"
+  }
+}
