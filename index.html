@@ -1,219 +1,331 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Countdown to Unban Henclin</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Countdown to December 2, 2025 9:27 AM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
     <style>
-        :root {
-            --primary-color: #e53935;
-            --bg-dark: #121212;
-            --bg-container: #222;
-            --text-light: #d0d0d0;
-            --text-secondary: #b0b0b0;
-        }
-        
         body {
             font-family: 'Poppins', sans-serif;
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #1e1e1e, #121212);
+            color: #c0c0c0;
             margin: 0;
-            padding: 0;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(135deg, #1e1e1e, var(--bg-dark));
-            color: var(--text-light);
-            text-align: center;
         }
-        
         #container {
             max-width: 720px;
-            width: 90%;
-            background-color: var(--bg-container);
+            width: 100%;
+            background-color: #222;
             border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+            padding: 30px 25px 40px 25px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
             transition: box-shadow 0.3s ease;
-            margin: 20px;
         }
-        
         #container:hover {
-            box-shadow: 0 0 40px rgba(229, 57, 53, 0.7);
+            box-shadow: 0 0 40px rgba(229,57,53,0.7);
         }
-        
+        h1 {
+            color: #d0d0d0;
+            text-shadow: 0 0 8px rgba(255,255,255,0.15);
+            margin-bottom: 12px;
+            font-weight: 700;
+            font-size: 1.8em;
+        }
+        #description {
+            color: #b0b0b0;
+            font-size: 1.15em;
+            margin-top: 0;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+        #countdown {
+            font-size: 2em;
+            color: #e53935;
+            text-shadow: 0 0 15px rgba(229,57,53,0.7);
+            margin-top: 10px;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            animation: pulse 2s infinite;
+            display: flex;
+            justify-content: center;
+            gap: 1em;
+        }
+        #message {
+            font-size: 2.8em;
+            color: #e53935;
+            margin-top: 30px;
+            text-shadow: 0 0 10px rgba(229,57,53,0.7);
+            font-weight: 700;
+        }
+        .time-segment {
+            display: inline-block;
+            min-width: 70px;
+            text-align: center;
+        }
         #profile-image {
             width: 130px;
             height: 130px;
             border-radius: 50%;
-            object-fit: cover;
-            margin: 0 auto 15px;
             display: block;
+            margin: 0 auto 15px auto;
             box-shadow: 0 0 15px #555;
             transition: box-shadow 0.3s ease;
         }
-        
         #profile-image:hover {
-            box-shadow: 0 0 30px var(--primary-color);
+            box-shadow: 0 0 30px #e53935;
         }
-        
-        h1 {
-            color: var(--text-light);
-            margin: 10px 0;
-            font-size: 1.8rem;
-            font-weight: 700;
-        }
-        
-        #description {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-            margin-bottom: 30px;
-        }
-        
-        #countdown {
-            font-size: 2rem;
-            color: var(--primary-color);
-            margin: 20px 0;
-            font-weight: 700;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .time-segment {
-            min-width: 70px;
+        #profile-name {
+            color: #b0b0b0;
+            font-size: 1.7em;
+            margin-bottom: 25px;
             text-align: center;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
         }
-        
+        @keyframes pulse {
+            0%, 100% {
+                text-shadow: 0 0 15px rgba(229,57,53,0.7);
+            }
+            50% {
+                text-shadow: 0 0 25px rgba(229,57,53,1);
+            }
+        }
+        @media (max-width: 480px) {
+            body {
+                padding: 20px 10px;
+            }
+            #container {
+                max-width: 100%;
+                padding: 20px 15px 30px 15px;
+            }
+            h1 {
+                font-size: 1.4em;
+            }
+            #description {
+                font-size: 1em;
+                margin-bottom: 20px;
+            }
+            #countdown {
+                font-size: 1.8em;
+                gap: 0.5em;
+            }
+            #message {
+                font-size: 2em;
+                margin-top: 20px;
+            }
+            #profile-image {
+                width: 100px;
+                height: 100px;
+                margin-bottom: 15px;
+            }
+            #profile-name {
+                font-size: 1.3em;
+                margin-bottom: 15px;
+            }
+        }
+        #target-date {
+            margin-top: 20px;
+            font-size: 1em;
+            color: #b0b0b0;
+        }
         #progress-container {
+            position: relative;
             width: 100%;
             height: 24px;
             background-color: #444;
             border-radius: 6px;
-            margin: 25px 0;
+            margin-top: 20px;
             overflow: hidden;
-            position: relative;
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        
         #progress-bar {
             height: 100%;
-            background-color: var(--primary-color);
             width: 0%;
+            background-color: #e53935;
+            border-radius: 6px;
             transition: width 0.5s ease;
-        }
-        
-        #progress-percent {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-weight: bold;
-            font-size: 0.9rem;
+            top: 0;
+            left: 0;
+            z-index: 1;
         }
-        
-        #target-date {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-top: 10px;
-        }
-        
-        @media (max-width: 600px) {
-            #container {
-                padding: 20px;
-            }
-            
-            #profile-image {
-                width: 100px;
-                height: 100px;
-            }
-            
-            h1 {
-                font-size: 1.4rem;
-            }
-            
-            #countdown {
-                font-size: 1.5rem;
-                gap: 10px;
-            }
-            
-            .time-segment {
-                min-width: 60px;
-            }
+        #progress-percent {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            text-align: center;
+            user-select: none;
         }
     </style>
 </head>
 <body>
     <div id="container">
-        <img src="henclin.png" alt="Profile Picture" id="profile-image">
-        <h1>Countdown Unban Henclin</h1>
-        <p id="description">Penghitung waktu hingga akun Henclin dibuka blokirnya</p>
-        
-        <div id="countdown">
-            <span class="time-segment" id="days">0d</span>
-            <span class="time-segment" id="hours">0h</span>
-            <span class="time-segment" id="minutes">0m</span>
-            <span class="time-segment" id="seconds">0s</span>
-        </div>
-        
+        <img src="henclin.png" alt="Profile" id="profile-image" />
+        <div id="profile-name">Henclin</div>
+        <h1>countdown akun henclin ke unban</h1>
+        <p id="description">Penghitung waktu mundur menunjukkan waktu tersisa hingga akun Henclin dibuka blokirnya.</p>
+        <div id="countdown"></div>
+        <div id="message"></div>
+        <div id="target-date">Target Date: December 2, 2025 09:27 AM</div>
         <div id="progress-container">
             <div id="progress-bar"></div>
             <div id="progress-percent">0%</div>
         </div>
-        
-        <div id="target-date">Target Date: December 2, 2025 09:27 AM</div>
     </div>
-
     <script>
-        // Tanggal target (2 Desember 2025 09:27)
-        const targetDate = new Date(2025, 11, 2, 9, 27, 0).getTime();
-        // Tanggal mulai (2 Juni 2025 09:27)
-        const startDate = new Date(2025, 5, 2, 9, 27, 0).getTime();
-        
-        // Update countdown setiap detik
-        const interval = setInterval(updateCountdown, 1000);
-        
-        function updateCountdown() {
-            const now = new Date().getTime();
-            const distance = targetDate - now;
-            const elapsed = Math.max(now - startDate, 0);
-            const totalDuration = targetDate - startDate;
-            
-            // Hitung progress (0-100%)
-            const progressPercent = Math.min((elapsed / totalDuration) * 100, 100);
-            
-            // Jika countdown selesai
-            if (distance <= 0) {
-                clearInterval(interval);
-                document.getElementById('days').textContent = '0d';
-                document.getElementById('hours').textContent = '0h';
-                document.getElementById('minutes').textContent = '0m';
-                document.getElementById('seconds').textContent = '0s';
-                document.getElementById('progress-bar').style.width = '100%';
-                document.getElementById('progress-percent').textContent = '100%';
-                return;
-            }
-            
-            // Hitung hari, jam, menit, detik
+        const countdownElement = document.getElementById('countdown');
+        const messageElement = document.getElementById('message');
+        const targetDate = new Date('December 2, 2025 09:27:00').getTime();
+        const progressBar = document.getElementById('progress-bar');
+        const progressPercentText = document.getElementById('progress-percent');
+        const startDate = new Date('June 2, 2025 09:27:00').getTime(); // Updated fixed countdown start time
+
+        const webhookUrl = 'https://discord.com/api/webhooks/1379038305831620638/NBIvFrPcOJ2wcCCnNjNg2H8HbCl-WKC21z6Hav44kuTGvatklsci2hwT2NUejT6XSwoG';
+
+        function formatRemainingTime(distance) {
             const days = Math.floor(distance / (1000 * 60 * 60 * 24));
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-            
-            // Update tampilan
-            document.getElementById('days').textContent = days + 'd';
-            document.getElementById('hours').textContent = hours + 'h';
-            document.getElementById('minutes').textContent = minutes + 'm';
-            document.getElementById('seconds').textContent = seconds + 's';
-            
-            // Update progress bar
-            document.getElementById('progress-bar').style.width = progressPercent + '%';
-            document.getElementById('progress-percent').textContent = progressPercent.toFixed(2) + '%';
+            return { days, hours, minutes, seconds };
         }
-        
-        // Jalankan sekali saat pertama load
+
+        async function sendWebhook(timeObj) {
+            try {
+                const progressBarLength = 20;
+                const totalDuration = targetDate - startDate;
+                const now = new Date().getTime();
+                const elapsed = now - startDate;
+                const progressPercent = Math.min((elapsed / totalDuration), 1);
+                const filledLength = Math.round(progressBarLength * progressPercent);
+                const emptyLength = progressBarLength - filledLength;
+                const progressBar = '🟥'.repeat(filledLength) + '⬜'.repeat(emptyLength);
+
+                // Format elapsed time
+                const elapsedTime = new Date(elapsed);
+                const elapsedDays = Math.floor(elapsed / (1000 * 60 * 60 * 24));
+                const elapsedHours = elapsedTime.getUTCHours();
+                const elapsedMinutes = elapsedTime.getUTCMinutes();
+                const elapsedSeconds = elapsedTime.getUTCSeconds();
+
+                // Dynamic status message based on progress
+                let statusMessage = "Keep going!";
+                if (progressPercent >= 1) {
+                    statusMessage = "🎉 Countdown finished! 🎉";
+                } else if (progressPercent > 0.75) {
+                    statusMessage = "Almost there!";
+                } else if (progressPercent > 0.5) {
+                    statusMessage = "More than halfway done!";
+                } else if (progressPercent > 0.25) {
+                    statusMessage = "Making progress!";
+                }
+
+                await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        embeds: [
+                            {
+                                title: "🚀 Henclin Unban Countdown 🚀",
+                                description: statusMessage,
+                                color: 0xe53935,
+                                author: {
+                                    name: "Henclin Countdown Bot",
+                                    icon_url: "https://cdn-icons-png.flaticon.com/512/2920/2920250.png"
+                                },
+                                fields: [
+                                    {
+                                        name: "Time Remaining",
+                                        value: `${timeObj.days}d ${timeObj.hours}h ${timeObj.minutes}m ${timeObj.seconds}s`,
+                                        inline: true
+                                    },
+                                    {
+                                        name: "Elapsed Time",
+                                        value: `${elapsedDays}d ${elapsedHours}h ${elapsedMinutes}m ${elapsedSeconds}s`,
+                                        inline: true
+                                    },
+                                    {
+                                        name: "Progress",
+                                        value: progressBar,
+                                        inline: false
+                                    },
+                                    {
+                                        name: "Percentage Complete",
+                                        value: `${(progressPercent * 100).toFixed(2)}%`,
+                                        inline: true
+                                    }
+                                ],
+                                footer: {
+                                    text: "Henclin Unban Countdown",
+                                    icon_url: "https://cdn-icons-png.flaticon.com/512/2920/2920250.png"
+                                },
+                                timestamp: new Date().toISOString()
+                            }
+                        ]
+                    }),
+                });
+            } catch (error) {
+                console.error('Error sending webhook:', error);
+            }
+        }
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+            const totalDuration = targetDate - startDate;
+            const elapsed = now - startDate;
+            const progressPercent = Math.min((elapsed / totalDuration) * 100, 100);
+
+            if (distance <= 0) {
+                countdownElement.style.display = 'none';
+                messageElement.textContent = 'Countdown finished!';
+                progressBar.style.width = '100%';
+                progressPercentText.textContent = '100%';
+                clearInterval(intervalId);
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            countdownElement.innerHTML = 
+                '<span class="time-segment">' + days + 'd</span>' + 
+                '<span class="time-segment">' + hours + 'h</span>' + 
+                '<span class="time-segment">' + minutes + 'm</span>' + 
+                '<span class="time-segment">' + seconds + 's</span>';
+
+            progressBar.style.width = progressPercent + '%';
+            progressPercentText.textContent = progressPercent.toFixed(2) + '%';
+        }
+
+        // Send webhook every 60 seconds with remaining countdown time
+        setInterval(() => {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+            if (distance > 0) {
+                const message = formatRemainingTime(distance);
+                sendWebhook(message);
+            }
+        }, 60000);
+
+
         updateCountdown();
+        const intervalId = setInterval(updateCountdown, 1000);
     </script>
 </body>
 </html>
