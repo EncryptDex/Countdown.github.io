@@ -1,0 +1,111 @@
+name: Scheduled Webhook Sender
+
+on:
+  schedule:
+    - cron: '*/1 * * * *'  # Runs every minute
+
+jobs:
+  send-webhook:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord Webhook with Countdown Data
+        run: |
+          TARGET_DATE="2025-12-02T09:27:00Z"
+          START_DATE="2025-06-02T09:27:00Z"
+          NOW=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          target_epoch=$(date -d "$TARGET_DATE" +%s)
+          start_epoch=$(date -d "$START_DATE" +%s)
+          now_epoch=$(date -d "$NOW" +%s)
+
+          distance=$((target_epoch - now_epoch))
+          elapsed=$((now_epoch - start_epoch))
+          total_duration=$((target_epoch - start_epoch))
+
+          if [ $distance -le 0 ]; then
+            days=0
+            hours=0
+            minutes=0
+            seconds=0
+            progress_percent=100
+          else
+            days=$((distance / 86400))
+            hours=$(((distance % 86400) / 3600))
+            minutes=$(((distance % 3600) / 60))
+            seconds=$((distance % 60))
+            progress_percent=$((elapsed * 100 / total_duration))
+            if [ $progress_percent -gt 100 ]; then
+              progress_percent=100
+            fi
+          fi
+
+          elapsed_days=$((elapsed / 86400))
+          elapsed_hours=$(((elapsed % 86400) / 3600))
+          elapsed_minutes=$(((elapsed % 3600) / 60))
+          elapsed_seconds=$((elapsed % 60))
+
+          progress_bar_length=20
+          filled_length=$((progress_percent * progress_bar_length / 100))
+          empty_length=$((progress_bar_length - filled_length))
+
+          filled_bar=$(printf '🟥%.0s' $(seq 1 $filled_length))
+          empty_bar=$(printf '⬜%.0s' $(seq 1 $empty_length))
+          progress_bar="$filled_bar$empty_bar"
+
+          if [ $progress_percent -ge 100 ]; then
+            status_message="🎉 Countdown finished! 🎉"
+          elif [ $progress_percent -gt 75 ]; then
+            status_message="Almost there!"
+          elif [ $progress_percent -gt 50 ]; then
+            status_message="More than halfway done!"
+          elif [ $progress_percent -gt 25 ]; then
+            status_message="Making progress!"
+          else
+            status_message="Keep going!"
+          fi
+
+          payload=$(cat <<'EOF'
+{
+  "embeds": [
+    {
+      "title": "🚀 Henclin Unban Countdown 🚀",
+      "description": "'"$status_message"'",
+      "color": 14811232,
+      "author": {
+        "name": "Henclin Countdown Bot",
+        "icon_url": "https://cdn-icons-png.flaticon.com/512/2920/2920250.png"
+      },
+      "fields": [
+        {
+          "name": "Time Remaining",
+          "value": "'"${days}d ${hours}h ${minutes}m ${seconds}s"'",
+          "inline": true
+        },
+        {
+          "name": "Elapsed Time",
+          "value": "'"${elapsed_days}d ${elapsed_hours}h ${elapsed_minutes}m ${elapsed_seconds}s"'",
+          "inline": true
+        },
+        {
+          "name": "Progress",
+          "value": "'"$progress_bar"'",
+          "inline": false
+        },
+        {
+          "name": "Percentage Complete",
+          "value": "'"${progress_percent}%"'",
+          "inline": true
+        }
+      ],
+      "footer": {
+        "text": "Henclin Unban Countdown",
+        "icon_url": "https://cdn-icons-png.flaticon.com/512/2920/2920250.png"
+      },
+      "timestamp": "'"$NOW"'"
+    }
+  ]
+}
+EOF
+)
+
+          curl -H "Content-Type: application/json" -X POST -d "$payload" "$DISCORD_WEBHOOK_URL"
