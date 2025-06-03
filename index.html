@@ -295,26 +295,12 @@
         #milestone-container {
             margin-top: 20px;
         }
-        #time-display-options {
+        #time-display-options { /* Adjusted styles for remaining elements */
             margin-top: 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
-        }
-        #timezone-select {
-            padding: 8px 12px;
-            border-radius: 5px;
-            border: 1px solid #555;
-            background-color: #333;
-            color: #c0c0c0;
-            font-family: 'Poppins', sans-serif;
-            font-size: 0.9em;
-            cursor: pointer;
-        }
-        #timezone-select option {
-            background-color: #333;
-            color: #c0c0c0;
+            gap: 5px; /* Reduced gap */
         }
         #time-until-container {
             margin-top: 10px;
@@ -352,7 +338,7 @@
         #timezone-info {
             font-size: 0.8em;
             color: #888;
-            margin-top: 5px;
+            /* Removed margin-top: 5px as it's now part of time-display-options gap */
         }
     </style>
 </head>
@@ -371,16 +357,7 @@
             <div id="time-until-container">
                 Unban will occur on <span id="time-until"></span>
             </div>
-            <div id="timezone-info">Times displayed in: 
-                <select id="timezone-select">
-                    <option value="local">Your Local Time</option>
-                    <option value="UTC">UTC</option>
-                    <option value="America/Los_Angeles">PST (Los Angeles)</option>
-                    <option value="America/New_York">EST (New York)</option>
-                    <option value="Europe/London">GMT (London)</option>
-                    <option value="Asia/Jakarta">WIB (Jakarta)</option>
-                    </select>
-            </div>
+            <div id="timezone-info">Times displayed in your local timezone</div>
         </div>
         
         <div id="time-served">Time Served: <span id="time-served-value">0d 0h 0m 0s</span></div>
@@ -407,7 +384,7 @@
         
         <div class="info-box">
             <h3><i class="fas fa-info-circle"></i> About This Ban</h3>
-            <p>This account was banned on June 2, 2025 at 09:27 AM WIB for a duration of 6 months. The unban process is automatic and will occur precisely at the scheduled time.</p>
+            <p>This account was banned on **June 2, 2025 at 09:27 AM WIB** for a duration of 6 months. The unban process is automatic and will occur precisely at the scheduled time.</p>
         </div>
         
         <div id="milestone-container">
@@ -474,7 +451,6 @@
         const statPercentElement = document.getElementById('stat-percent');
         const statPhaseElement = document.getElementById('stat-phase');
         const notificationToggle = document.getElementById('notification-toggle');
-        const timezoneSelect = document.getElementById('timezone-select');
         const copyLinkButton = document.getElementById('copy-link');
 
         // IMPORTANT: Replace with your actual Discord webhook URL if you're using it
@@ -549,17 +525,10 @@
             return { days, hours, minutes, seconds };
         }
         
-        function getPhase(percent) {
-            if (percent >= 99.9) return 'Unbanned!';
-            if (percent >= 75) return 'Final Stretch';
-            if (percent >= 50) return 'Mid Phase';
-            if (percent >= 25) return 'Progressing';
-            return 'Early Phase';
-        }
-        
-        function formatUnbanDateTime(targetTimestamp, timezone) {
+        // Modified formatUnbanDateTime to always use local timezone
+        function formatUnbanDateTime(targetTimestamp) {
             const date = new Date(targetTimestamp);
-            let options = { 
+            const options = { 
                 weekday: 'long', 
                 year: 'numeric', 
                 month: 'long', 
@@ -567,26 +536,10 @@
                 hour: '2-digit',
                 minute: '2-digit',
                 second: '2-digit',
-                hour12: true // Use 12-hour format with AM/PM
+                hour12: true, // Use 12-hour format with AM/PM
+                timeZoneName: 'short' // Display local timezone abbreviation
             };
-
-            if (timezone === 'UTC') {
-                options.timeZone = 'UTC';
-                return date.toLocaleDateString('en-US', options) + ' UTC';
-            } else if (timezone === 'local') {
-                 options.timeZoneName = 'short'; // Display local timezone abbreviation
-                return date.toLocaleDateString(undefined, options);
-            } else {
-                try {
-                    options.timeZone = timezone;
-                    options.timeZoneName = 'short';
-                    return date.toLocaleDateString(undefined, options);
-                } catch (e) {
-                    console.error("Invalid timezone:", timezone, e);
-                    options.timeZoneName = 'short'; // Fallback to local if invalid
-                    return date.toLocaleDateString(undefined, options);
-                }
-            }
+            return date.toLocaleDateString(undefined, options);
         }
         
         async function sendWebhook(timeObj, elapsedObj, progressPercent) {
@@ -672,8 +625,8 @@
             const { days: elapsedDays, hours: elapsedHours, minutes: elapsedMinutes, seconds: elapsedSeconds } = formatTime(elapsed);
             timeServedValueElement.textContent = `${elapsedDays}d ${elapsedHours}h ${elapsedMinutes}m ${elapsedSeconds}s`;
 
-            // Update target date display based on selected timezone
-            timeUntilElement.textContent = formatUnbanDateTime(targetDate, timezoneSelect.value);
+            // Update target date display (always local timezone now)
+            timeUntilElement.textContent = formatUnbanDateTime(targetDate);
 
             if (distance <= 0) {
                 countdownElement.style.display = 'none';
@@ -739,9 +692,6 @@
                 lastWebhookSentHour = currentHour;
             }
         }
-
-        // Event listener for timezone selection change
-        timezoneSelect.addEventListener('change', updateCountdown);
 
         // Copy link functionality
         copyLinkButton.addEventListener('click', (event) => {
