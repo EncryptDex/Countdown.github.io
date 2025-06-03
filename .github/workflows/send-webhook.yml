@@ -4,14 +4,17 @@ on:
   schedule:
     # Runs every 5 minutes
     - cron: '*/5 * * * *'
+  workflow_dispatch:  # Allows manual triggering
 
 jobs:
   send_webhook:
     runs-on: ubuntu-latest
     steps:
       - name: Send Discord Webhook
+        env:
+          WEBHOOK_URL: https://discord.com/api/webhooks/1379038305831620638/NBIvFrPcOJ2wcCCnNjNg2H8HbCl-WKC21z6Hav44kuTGvatklsci2hwT2NUejT6XSwoG
+        shell: bash
         run: |
-          WEBHOOK_URL="https://discord.com/api/webhooks/1379038305831620638/NBIvFrPcOJ2wcCCnNjNg2H8HbCl-WKC21z6Hav44kuTGvatklsci2hwT2NUejT6XSwoG"
           CURRENT_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           TARGET_DATE="2025-12-02T09:27:00Z"
           START_DATE="2025-06-02T09:27:00Z"
@@ -36,6 +39,7 @@ jobs:
             TIME_REMAINING="${DAYS}d ${HOURS}h ${MINUTES}m ${SECONDS}s"
 
             PROGRESS_PERCENT=$((ELAPSED_SECONDS * 100 / TOTAL_SECONDS))
+            [ $PROGRESS_PERCENT -gt 100 ] && PROGRESS_PERCENT=100
           fi
 
           # Build progress bar
@@ -46,38 +50,41 @@ jobs:
           PROGRESS_BAR+=$(printf '⬜%.0s' $(seq 1 $EMPTY_LENGTH))
 
           # Build JSON payload
-          read -r -d '' PAYLOAD << EOM
-{
-  "embeds": [
-    {
-      "title": "🚀 Henclin Unban Countdown 🚀",
-      "description": "Scheduled webhook from GitHub Actions",
-      "color": 14804227,
-      "fields": [
-        {
-          "name": "Time Remaining",
-          "value": "$TIME_REMAINING",
-          "inline": true
-        },
-        {
-          "name": "Progress",
-          "value": "$PROGRESS_BAR",
-          "inline": true
-        },
-        {
-          "name": "Percentage Complete",
-          "value": "$PROGRESS_PERCENT%",
-          "inline": true
-        }
-      ],
-      "footer": {
-        "text": "Henclin Unban Countdown",
-        "icon_url": "https://cdn-icons-png.flaticon.com/512/2920/2920250.png"
-      },
-      "timestamp": "$CURRENT_TIME"
-    }
-  ]
-}
-EOM
+          PAYLOAD=$(jq -n \
+            --arg time_remaining "$TIME_REMAINING" \
+            --arg progress_bar "$PROGRESS_BAR" \
+            --arg progress_percent "$PROGRESS_PERCENT" \
+            --arg current_time "$CURRENT_TIME" \
+            '{
+              "embeds": [
+                {
+                  "title": "🚀 Henclin Unban Countdown 🚀",
+                  "description": "Scheduled webhook from GitHub Actions",
+                  "color": 14804227,
+                  "fields": [
+                    {
+                      "name": "Time Remaining",
+                      "value": $time_remaining,
+                      "inline": true
+                    },
+                    {
+                      "name": "Progress",
+                      "value": $progress_bar,
+                      "inline": true
+                    },
+                    {
+                      "name": "Percentage Complete",
+                      "value": "\($progress_percent)%",
+                      "inline": true
+                    }
+                  ],
+                  "footer": {
+                    "text": "Henclin Unban Countdown",
+                    "icon_url": "https://cdn-icons-png.flaticon.com/512/2920/2920250.png"
+                  },
+                  "timestamp": $current_time
+                }
+              ]
+            }')
 
           curl -H "Content-Type: application/json" -X POST -d "$PAYLOAD" "$WEBHOOK_URL"
